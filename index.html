@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>2026 · 寰宇纪元</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 画布层 -->
+    <canvas id="world"></canvas>
+
+    <!-- 阶段 0: 入场仪式 (最顶层) -->
+    <div id="intro-gate">
+        <div class="gate-content">
+            <div class="gate-title">2026 寰宇纪元</div>
+            <div class="gate-subtitle">即将抵达新世界</div>
+            <div class="fingerprint-scanner" id="unlock-btn">
+                <div class="scan-line"></div>
+                <span class="icon">👆</span>
+            </div>
+            <div class="gate-hint">长按指纹 解锁时空</div>
+        </div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <div class="top-nav" id="top-nav">
+        <div class="nav-left">
+            <div class="nav-item music-control" onclick="app.toggleMusic()">
+                <audio id="bgm" loop playsinline preload="auto">
+                    <!-- 这里修改为你的本地文件 a.mp3 -->
+                    <source src="a.mp3" type="audio/mpeg">
+                </audio>
+                <div class="visualizer">
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                </div>
+            </div>
+        </div>
+        <div class="nav-right">
+             <button class="nav-item theme-toggle" onclick="app.toggleDayNight()">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- UI 交互层 -->
+    <div id="ui-layer">
+        
+        <!-- 阶段 1: 倒计时锁定 -->
+        <div id="page-lock" class="page active">
+            <div class="glass-panel lock-panel">
+                <div class="timer-label">距离 2026 (CN) 还有</div>
+                <div id="timer" class="timer-digits">00:00:00</div>
+                <div class="lock-sub">SYSTEM LOCKED</div>
+            </div>
+        </div>
+
+        <!-- 阶段 2: 身份选择 -->
+        <div id="page-identity" class="page">
+            <div class="glass-panel identity-panel">
+                <h2>请确认你的时空身份</h2>
+                <p style="opacity:0.7; font-size:0.9rem; margin-bottom:30px;">这将决定世界的色彩与旋律</p>
+                <div class="identity-cards">
+                    <!-- 选项 A -->
+                    <div class="id-card" onclick="app.setIdentity('star')">
+                        <div class="id-icon">🪐</div>
+                        <h3>星辰 · 少年</h3>
+                        <p>征途是星辰大海</p>
+                    </div>
+                    <!-- 选项 B -->
+                    <div class="id-card" onclick="app.setIdentity('flower')">
+                        <div class="id-icon">🌸</div>
+                        <h3>繁花 · 少女</h3>
+                        <p>心中有光 自有芳华</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 阶段 3: 纯净画板模式 -->
+        <div id="page-draw" class="page">
+            <div class="drawing-toolbar">
+                <div class="color-picker">
+                    <div class="color-dot" style="background:#ffd700" onclick="app.setBrushColor('#ffd700')"></div>
+                    <div class="color-dot" style="background:#ff416c" onclick="app.setBrushColor('#ff416c')"></div>
+                    <div class="color-dot" style="background:#00f2ff" onclick="app.setBrushColor('#00f2ff')"></div>
+                    <div class="color-dot" style="background:#ffffff" onclick="app.setBrushColor('#ffffff')"></div>
+                </div>
+                <button class="tool-btn" onclick="app.clearCanvas()">🗑️</button>
+                <button class="tool-btn exit-btn" onclick="app.exitDrawingMode()">退出</button>
+            </div>
+            <div class="draw-hint">纯净模式：仅支持绘画，无烟花干扰</div>
+        </div>
+
+        <!-- 阶段 4: 主控台 (底部 Dock) -->
+        <div id="bottom-controls" class="bottom-dock-wrapper" style="display:none;">
+            <div class="main-hint" id="main-hint">点击屏幕绽放烟火 · 滑动书写星尘</div>
+            <div class="bottom-dock">
+                <button class="dock-btn" onclick="app.enterDrawingMode()">
+                    <span class="btn-icon">🎨</span><span>画画</span>
+                </button>
+                <button class="dock-btn" onclick="app.openCapsule()">
+                    <span class="btn-icon">💊</span><span>胶囊</span>
+                </button>
+                <button class="dock-btn main-action" onclick="app.openShare()">
+                    <span class="btn-icon">💌</span><span>祝福</span>
+                </button>
+                <button class="dock-btn" onclick="app.startGame()">
+                    <span class="btn-icon">🎮</span><span>游戏</span>
+                </button>
+                <button class="dock-btn" onclick="app.openMovie()">
+                    <span class="btn-icon">🍿</span><span>电影</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗组件 -->
+    <div id="modal-share" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header"><h3>发送时空信号</h3><span class="close" onclick="app.closeModal('modal-share')">×</span></div>
+            <div class="input-group">
+                <input type="text" id="share-name" placeholder="你的署名">
+                <input type="text" id="share-msg" placeholder="写一句祝福">
+            </div>
+            <button class="btn-primary" onclick="app.createShareLink()">生成专属链接</button>
+        </div>
+    </div>
+
+    <div id="modal-receive" class="modal">
+        <div class="modal-content glass-card special-border">
+            <div class="signal-anim">📡</div>
+            <h3>收到来自远方的信号</h3>
+            <div class="receive-box">
+                <p class="from-text">From: <span id="recv-name">...</span></p>
+                <p class="msg-text">"<span id="recv-msg">...</span>"</p>
+            </div>
+            <button class="btn-primary" onclick="app.closeModal('modal-receive')">接收祝福</button>
+        </div>
+    </div>
+
+    <div id="modal-capsule" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header"><h3>2026 时间胶囊</h3><span class="close" onclick="app.closeModal('modal-capsule')">×</span></div>
+            <div id="capsule-state-empty">
+                <textarea id="capsule-input" placeholder="写给未来的自己..."></textarea>
+                <button class="btn-primary" onclick="app.sealCapsule()">封存胶囊</button>
+            </div>
+            <div id="capsule-state-sealed" style="display:none; text-align:center;">
+                <div style="font-size:3rem; margin:20px;">🔒</div>
+                <p>胶囊已封存</p>
+                <p class="capsule-date" id="capsule-date-display"></p>
+                <p class="capsule-content" id="capsule-content-display"></p>
+                <button class="btn-text" onclick="app.resetCapsule()">销毁并重写</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-ui" style="display:none">
+        <div class="score-pill">欧气: <span id="score-val">0</span> | 时间: <span id="game-time">15</span>s</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
